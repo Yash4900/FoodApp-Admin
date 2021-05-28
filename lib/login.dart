@@ -27,9 +27,7 @@ class _LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     double totalWidth = MediaQuery.of(context).size.width;
-    print(totalWidth);
     double totalHeight = MediaQuery.of(context).size.height;
-    print(totalHeight);
     double defaultFontSize = totalHeight * 14 / 700;
     double defaultIconSize = totalHeight * 17 / 700;
 
@@ -145,8 +143,13 @@ class _LoginState extends State<Login> {
                               .checkIfUserExists("+91" + _phoneController.text);
                           if (userExist == true) {
                             // if user exists then we perform OTP verification
-                            await Auth().phoneNumberVerification(
-                                "+91" + _phoneController.text, false, context);
+                            await Auth()
+                                .phoneNumberVerification(
+                                    "+91" + _phoneController.text,
+                                    false,
+                                    context)
+                                .then((value) =>
+                                    setState(() => clickedOnSignIn = false));
                           } else {
                             AlertMessage().showAlertDialog(context, "Error!",
                                 "You are not an authorized user");

@@ -12,12 +12,15 @@ class AlertMessage {
         return AlertDialog(
           title: Text(
             title,
-            style: GoogleFonts.lexendDeca(fontWeight: FontWeight.bold),
+            style: GoogleFonts.lexendDeca(fontWeight: FontWeight.w500),
           ),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text(message),
+                Text(
+                  message,
+                  style: GoogleFonts.lexendDeca(),
+                ),
               ],
             ),
           ),

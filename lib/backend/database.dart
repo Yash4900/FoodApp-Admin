@@ -14,4 +14,8 @@ class Database {
     });
     return retValue;
   }
+
+  Stream<QuerySnapshot> getOrders() {
+    return FirebaseFirestore.instance.collection('Orders').snapshots();
+  }
 }
