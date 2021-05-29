@@ -4,6 +4,7 @@ import 'package:food_delivery_app/widgets/loading.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:food_delivery_app/widgets/alert.dart';
+import 'package:intl/intl.dart';
 
 class Dashboard extends StatefulWidget {
   @override
@@ -13,11 +14,34 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   bool loading = true;
   Stream orders;
+  DateTime selectedDate = DateTime.now();
 
   fetchData() {
-    orders = Database().getOrders();
+    orders = Database()
+        .getOrders(DateFormat('dd MMM y').format(selectedDate).toString());
     loading = false;
     setState(() {});
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate,
+      firstDate: DateTime.now().subtract(Duration(days: 15)),
+      lastDate: DateTime.now().add(Duration(days: 15)),
+    );
+    if (picked != null && picked != selectedDate) {
+      selectedDate = picked;
+      setState(() => loading = true);
+      orders = Database()
+          .getOrders(DateFormat('dd MMM y').format(selectedDate).toString());
+      setState(() => loading = false);
+    }
+  }
+
+  String deliverBefore(String time) {
+    time = time.substring(0, 2);
+    return time;
   }
 
   @override
@@ -58,16 +82,60 @@ class _DashboardState extends State<Dashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text('Orders',
-                          style: GoogleFonts.lexendDeca(
-                              fontSize: 20, fontWeight: FontWeight.w600)),
-                    ),
-                    flex: 1,
+                    child: Column(children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Text(
+                            DateFormat('dd MMM y')
+                                .format(selectedDate)
+                                .toString(),
+                            style: GoogleFonts.lexendDeca(
+                                fontSize: 20,
+                                color: Colors.grey[700],
+                                fontWeight: FontWeight.w500),
+                          ),
+                          Theme(
+                            data: ThemeData.dark(),
+                            child: Builder(
+                              builder: (context) => TextButton(
+                                style: ButtonStyle(
+                                  backgroundColor:
+                                      MaterialStateProperty.all<Color>(
+                                    Color(0xFFFF785B),
+                                  ),
+                                ),
+                                child: Text(
+                                  'Select Date',
+                                  style: GoogleFonts.lexendDeca(
+                                      color: Colors.white, fontSize: 16),
+                                ),
+                                onPressed: () async {
+                                  await _selectDate(context);
+                                  setState(() => loading = true);
+                                  await fetchData();
+                                },
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
+                      Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Text('Orders',
+                                  style: GoogleFonts.lexendDeca(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.w600)),
+                            ),
+                          ]),
+                    ]),
+                    flex: 2,
                   ),
                   Expanded(
-                    flex: 12,
+                    flex: 13,
                     child: StreamBuilder(
                       stream: orders,
                       builder: (context, snapshot) {
@@ -91,232 +159,262 @@ class _DashboardState extends State<Dashboard> {
                                   bool visible = false;
                                   IconData id =
                                       Icons.keyboard_arrow_down_rounded;
-                                  return Container(
-                                    margin: EdgeInsets.all(5),
-                                    padding: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(10),
-                                      ),
-                                      color: Colors.white,
-                                    ),
-                                    child: Column(
-                                      children: [
-                                        // customer identity
-                                        Row(children: [
-                                          Icon(Icons.person,
-                                              color: Colors.grey, size: 17),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(
-                                            ds.data()['userName'],
-                                            style: GoogleFonts.lexendDeca(
-                                                fontSize: 15),
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text(ds.data()['userPhone'],
-                                              style: GoogleFonts.lexendDeca(
-                                                  fontSize: 15,
-                                                  color: Colors.grey[800])),
-                                        ]),
-                                        // customer address
-                                        Row(
-                                          children: [
-                                            Icon(Icons.home,
-                                                color: Colors.grey, size: 17),
-                                            SizedBox(
-                                              width: 10,
+                                  return ds
+                                          .data()['self_delivery']
+                                          .contains(false)
+                                      ? Container(
+                                          margin: EdgeInsets.all(5),
+                                          padding: EdgeInsets.all(5),
+                                          decoration: BoxDecoration(
+                                            borderRadius: BorderRadius.all(
+                                              Radius.circular(10),
                                             ),
-                                            Text(
-                                              (ds.data()['address'].substring(
-                                                      0,
-                                                      ds
-                                                                  .data()[
-                                                                      'address']
-                                                                  .length >
-                                                              19
-                                                          ? 20
-                                                          : ds
-                                                              .data()['address']
-                                                              .length)) +
-                                                  "...",
-                                              style: GoogleFonts.lexendDeca(
-                                                  fontSize: 15,
-                                                  color: Colors.grey[700]),
-                                            ),
-                                            GestureDetector(
-                                                onTap: () {
-                                                  AlertMessage()
-                                                      .showAlertDialog(
-                                                          context,
-                                                          'Address',
-                                                          ds.data()['address']);
-                                                },
-                                                child: Text(
-                                                  'View more',
+                                            color: Colors.white,
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              // customer identity
+                                              Row(children: [
+                                                Icon(Icons.person,
+                                                    color: Colors.grey,
+                                                    size: 17),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(
+                                                  ds.data()['userName'],
                                                   style: GoogleFonts.lexendDeca(
-                                                      color: Color(0xFFFF785B)),
-                                                ))
-                                          ],
-                                        ),
-                                        Container(
-                                          child: StatefulBuilder(
-                                            builder: (BuildContext context,
-                                                StateSetter changeState) {
-                                              return Column(
-                                                children: [
-                                                  GestureDetector(
-                                                      child: Row(
-                                                        children: [
-                                                          Icon(
-                                                            Icons.restaurant,
-                                                            size: 17,
-                                                            color: Colors.grey,
-                                                          ),
-                                                          SizedBox(width: 10),
-                                                          Text(
-                                                            "View Items",
-                                                            style: GoogleFonts
-                                                                .lexendDeca(),
-                                                          ),
-                                                          Icon(id)
-                                                        ],
-                                                      ),
-                                                      onTap: () {
-                                                        changeState(() {
-                                                          visible = !visible;
-                                                          if (id ==
-                                                              Icons
-                                                                  .keyboard_arrow_down_rounded) {
-                                                            id = Icons
-                                                                .keyboard_arrow_up_rounded;
-                                                          } else {
-                                                            id = Icons
-                                                                .keyboard_arrow_down_rounded;
-                                                          }
-                                                        });
-                                                      }),
-                                                  Visibility(
-                                                    visible: visible,
-                                                    child: Column(children: [
-                                                      Container(
-                                                        color: Colors.grey[200],
-                                                        child: Row(
-                                                          children: [
-                                                            Expanded(
-                                                                child: Text(
-                                                                    "Dish",
-                                                                    style: GoogleFonts
-                                                                        .lexendDeca()),
-                                                                flex: 3),
-                                                            Expanded(
-                                                                child: Text(
-                                                                    "Price",
-                                                                    style: GoogleFonts
-                                                                        .lexendDeca()),
-                                                                flex: 2),
-                                                            Expanded(
-                                                                child: Text(
-                                                                    "Quantity",
-                                                                    style: GoogleFonts
-                                                                        .lexendDeca()),
-                                                                flex: 2),
-                                                            Expanded(
-                                                                child: Text(
-                                                                    "To be delivered before",
-                                                                    style: GoogleFonts
-                                                                        .lexendDeca()),
-                                                                flex: 3)
-                                                          ],
-                                                        ),
-                                                      ),
-                                                      SizedBox(height: 4),
-                                                      ListView.builder(
-                                                        shrinkWrap: true,
-                                                        itemCount: ds
-                                                            .data()['dishName']
-                                                            .length,
-                                                        itemBuilder:
-                                                            (context, index1) {
-                                                          if (ds.data()[
-                                                                      'self_delivery']
-                                                                  [index1] ==
-                                                              false) {
-                                                            return Row(
-                                                              children: [
-                                                                Expanded(
-                                                                    child: Text(
-                                                                        ds.data()['dishName']
-                                                                            [
-                                                                            index1],
-                                                                        style: GoogleFonts
-                                                                            .lexendDeca()),
-                                                                    flex: 3),
-                                                                Expanded(
-                                                                    child: Text(
-                                                                        ds.data()['pricePerServing']
-                                                                            [
-                                                                            index1],
-                                                                        style: GoogleFonts
-                                                                            .lexendDeca()),
-                                                                    flex: 2),
-                                                                Expanded(
-                                                                    child: Text(
-                                                                        ds.data()['quantity']
-                                                                            [
-                                                                            index1],
-                                                                        style: GoogleFonts
-                                                                            .lexendDeca()),
-                                                                    flex: 2),
-                                                                Expanded(
-                                                                    child: Text(
-                                                                        "To be delivered before",
-                                                                        style: GoogleFonts
-                                                                            .lexendDeca()),
-                                                                    flex: 3)
-                                                              ],
-                                                            );
-                                                          } else {
-                                                            return Container();
-                                                          }
-                                                        },
-                                                      ),
-                                                    ]),
-                                                  )
-                                                ],
-                                              );
-                                            },
-                                          ),
-                                        ),
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.end,
-                                          children: [
-                                            GestureDetector(
-                                              onTap: () => AlertMessage()
-                                                  .showAlertDialog(
-                                                      context,
-                                                      "Address",
-                                                      ds.data()["chefAddress"]),
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(4),
-                                                child: Text(
-                                                    "View chef's address",
+                                                      fontSize: 15),
+                                                ),
+                                                SizedBox(
+                                                  width: 10,
+                                                ),
+                                                Text(ds.data()['userPhone'],
                                                     style:
                                                         GoogleFonts.lexendDeca(
+                                                            fontSize: 15,
                                                             color: Colors
-                                                                .blue[600])),
+                                                                .grey[800])),
+                                              ]),
+                                              SizedBox(height: 5),
+
+                                              // customer address
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Icon(Icons.home,
+                                                      color: Colors.grey,
+                                                      size: 17),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Expanded(
+                                                    child: Text(
+                                                      ds.data()['address'],
+                                                      style: GoogleFonts
+                                                          .lexendDeca(
+                                                              fontSize: 15,
+                                                              color: Colors
+                                                                  .grey[700]),
+                                                    ),
+                                                  ),
+                                                  // GestureDetector(
+                                                  //     onTap: () {
+                                                  //       AlertMessage()
+                                                  //           .showAlertDialog(
+                                                  //               context,
+                                                  //               'Address',
+                                                  //               ds.data()['address']);
+                                                  //     },
+                                                  //     child: Text(
+                                                  //       'View more',
+                                                  //       style: GoogleFonts.lexendDeca(
+                                                  //           color: Color(0xFFFF785B)),
+                                                  //     ))
+                                                ],
                                               ),
-                                            )
-                                          ],
+                                              SizedBox(height: 5),
+
+                                              Container(
+                                                child: StatefulBuilder(
+                                                  builder: (BuildContext
+                                                          context,
+                                                      StateSetter changeState) {
+                                                    return Column(
+                                                      children: [
+                                                        GestureDetector(
+                                                            child: Row(
+                                                              children: [
+                                                                Icon(
+                                                                  Icons
+                                                                      .restaurant,
+                                                                  size: 17,
+                                                                  color: Colors
+                                                                      .grey,
+                                                                ),
+                                                                SizedBox(
+                                                                    width: 10),
+                                                                Text(
+                                                                  "View Items",
+                                                                  style: GoogleFonts
+                                                                      .lexendDeca(),
+                                                                ),
+                                                                Icon(id)
+                                                              ],
+                                                            ),
+                                                            onTap: () {
+                                                              changeState(() {
+                                                                visible =
+                                                                    !visible;
+                                                                if (id ==
+                                                                    Icons
+                                                                        .keyboard_arrow_down_rounded) {
+                                                                  id = Icons
+                                                                      .keyboard_arrow_up_rounded;
+                                                                } else {
+                                                                  id = Icons
+                                                                      .keyboard_arrow_down_rounded;
+                                                                }
+                                                              });
+                                                            }),
+                                                        SizedBox(height: 5),
+                                                        Visibility(
+                                                          visible: visible,
+                                                          child: Column(
+                                                              children: [
+                                                                Container(
+                                                                  color: Colors
+                                                                          .grey[
+                                                                      200],
+                                                                  child: Row(
+                                                                    children: [
+                                                                      Expanded(
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(3.0),
+                                                                            child:
+                                                                                Text("Dish", style: GoogleFonts.lexendDeca()),
+                                                                          ),
+                                                                          flex:
+                                                                              3),
+                                                                      Expanded(
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(3.0),
+                                                                            child:
+                                                                                Text("Price x Quantity", style: GoogleFonts.lexendDeca()),
+                                                                          ),
+                                                                          flex:
+                                                                              2),
+                                                                      Expanded(
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(3.0),
+                                                                            child:
+                                                                                Text("To be delivered before", style: GoogleFonts.lexendDeca()),
+                                                                          ),
+                                                                          flex:
+                                                                              2),
+                                                                      Expanded(
+                                                                          child:
+                                                                              Padding(
+                                                                            padding:
+                                                                                const EdgeInsets.all(3.0),
+                                                                            child:
+                                                                                Text("Delivered", style: GoogleFonts.lexendDeca()),
+                                                                          ),
+                                                                          flex:
+                                                                              2)
+                                                                    ],
+                                                                  ),
+                                                                ),
+                                                                SizedBox(
+                                                                    height: 4),
+                                                                ListView
+                                                                    .builder(
+                                                                  shrinkWrap:
+                                                                      true,
+                                                                  itemCount: ds
+                                                                      .data()[
+                                                                          'dishName']
+                                                                      .length,
+                                                                  itemBuilder:
+                                                                      (context,
+                                                                          index1) {
+                                                                    if (ds.data()['self_delivery'][index1] ==
+                                                                            false &&
+                                                                        ds.data()['dateToBeDelivered'][index1] ==
+                                                                            DateFormat('dd MMM y').format(selectedDate).toString()) {
+                                                                      return Row(
+                                                                        children: [
+                                                                          Expanded(
+                                                                              child: Text(ds.data()['dishName'][index1], style: GoogleFonts.lexendDeca()),
+                                                                              flex: 3),
+                                                                          Expanded(
+                                                                              child: Text('${ds.data()['pricePerServing'][index1]} x ${ds.data()['quantity'][index1]}', style: GoogleFonts.lexendDeca()),
+                                                                              flex: 2),
+                                                                          Expanded(
+                                                                              child: Text(ds.data()['toTime'][index1], style: GoogleFonts.lexendDeca()),
+                                                                              flex: 2),
+                                                                          Expanded(
+                                                                              child: Checkbox(
+                                                                                value: ds.data()['isDelivered'][index1],
+                                                                                onChanged: (value) async {
+                                                                                  List temp = ds.data()['isDelivered'];
+                                                                                  temp[index1] = !temp[index1];
+                                                                                  setState(() => loading = true);
+                                                                                  await Database().updateDeliveryStatus(ds.id, temp);
+                                                                                  setState(() => loading = false);
+                                                                                },
+                                                                              ),
+                                                                              flex: 2),
+                                                                        ],
+                                                                      );
+                                                                    } else {
+                                                                      return Container();
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              ]),
+                                                        )
+                                                      ],
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                              Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () => AlertMessage()
+                                                        .showAlertDialog(
+                                                            context,
+                                                            "Address",
+                                                            ds.data()[
+                                                                "chefAddress"]),
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              4),
+                                                      child: Text(
+                                                          "View chef's address",
+                                                          style: GoogleFonts
+                                                              .lexendDeca(
+                                                                  color: Color(
+                                                                      0xFFFF785B))),
+                                                    ),
+                                                  )
+                                                ],
+                                              )
+                                            ],
+                                          ),
                                         )
-                                      ],
-                                    ),
-                                  );
+                                      : Container();
                                 });
                           } else {
                             return Center(

@@ -15,7 +15,17 @@ class Database {
     return retValue;
   }
 
-  Stream<QuerySnapshot> getOrders() {
-    return FirebaseFirestore.instance.collection('Orders').snapshots();
+  Stream<QuerySnapshot> getOrders(String date) {
+    return FirebaseFirestore.instance
+        .collection('Orders')
+        .where('dateToBeDelivered', arrayContains: date)
+        .snapshots();
+  }
+
+  Future<void> updateDeliveryStatus(String id, List values) async {
+    await FirebaseFirestore.instance
+        .collection('Orders')
+        .doc(id)
+        .update({'isDelivered': values});
   }
 }
