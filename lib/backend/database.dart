@@ -28,4 +28,11 @@ class Database {
         .doc(id)
         .update({'isDelivered': values});
   }
+
+  Future<void> pushToken(String uid, String token) async {
+    await FirebaseFirestore.instance
+        .collection('Admin')
+        .doc(uid)
+        .update({'token': token});
+  }
 }

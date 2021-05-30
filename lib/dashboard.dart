@@ -23,6 +23,18 @@ class _DashboardState extends State<Dashboard> {
     setState(() {});
   }
 
+  bool display(List l1, List l2) {
+    bool retVal = false;
+    String date = DateFormat('dd MMM y').format(selectedDate).toString();
+    for (int i = 0; i < l1.length; i++) {
+      if (l1[i] == false && l2[i] == date) {
+        retVal = true;
+        break;
+      }
+    }
+    return retVal;
+  }
+
   Future<void> _selectDate(BuildContext context) async {
     final DateTime picked = await showDatePicker(
       context: context,
@@ -37,11 +49,6 @@ class _DashboardState extends State<Dashboard> {
           .getOrders(DateFormat('dd MMM y').format(selectedDate).toString());
       setState(() => loading = false);
     }
-  }
-
-  String deliverBefore(String time) {
-    time = time.substring(0, 2);
-    return time;
   }
 
   @override
@@ -159,9 +166,8 @@ class _DashboardState extends State<Dashboard> {
                                   bool visible = false;
                                   IconData id =
                                       Icons.keyboard_arrow_down_rounded;
-                                  return ds
-                                          .data()['self_delivery']
-                                          .contains(false)
+                                  return display(ds.data()['self_delivery'],
+                                          ds.data()['dateToBeDelivered'])
                                       ? Container(
                                           margin: EdgeInsets.all(5),
                                           padding: EdgeInsets.all(5),
