@@ -41,6 +41,17 @@ class _DashboardState extends State<Dashboard> {
       initialDate: selectedDate,
       firstDate: DateTime.now().subtract(Duration(days: 15)),
       lastDate: DateTime.now().add(Duration(days: 15)),
+      builder: (BuildContext context, Widget child) {
+        return Theme(
+          data: ThemeData.light().copyWith(
+            colorScheme: ColorScheme.light(
+              primary: Color(0xFFFF785B),
+              onPrimary: Colors.white,
+            ),
+          ),
+          child: child,
+        );
+      },
     );
     if (picked != null && picked != selectedDate) {
       selectedDate = picked;
@@ -89,45 +100,46 @@ class _DashboardState extends State<Dashboard> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
-                    child: Column(children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          Text(
-                            DateFormat('dd MMM y')
-                                .format(selectedDate)
-                                .toString(),
-                            style: GoogleFonts.lexendDeca(
-                                fontSize: 20,
-                                color: Colors.grey[700],
-                                fontWeight: FontWeight.w500),
-                          ),
-                          Theme(
-                            data: ThemeData.dark(),
-                            child: Builder(
-                              builder: (context) => TextButton(
-                                style: ButtonStyle(
-                                  backgroundColor:
-                                      MaterialStateProperty.all<Color>(
-                                    Color(0xFFFF785B),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Select Date',
-                                  style: GoogleFonts.lexendDeca(
-                                      color: Colors.white, fontSize: 16),
-                                ),
-                                onPressed: () async {
-                                  await _selectDate(context);
-                                  setState(() => loading = true);
-                                  await fetchData();
-                                },
-                              ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            Text(
+                              DateFormat('dd MMM y')
+                                  .format(selectedDate)
+                                  .toString(),
+                              style: GoogleFonts.lexendDeca(
+                                  fontSize: 20,
+                                  color: Colors.grey[700],
+                                  fontWeight: FontWeight.w500),
                             ),
-                          )
-                        ],
-                      ),
-                      Row(
+                            Theme(
+                              data: ThemeData.dark(),
+                              child: Builder(
+                                builder: (context) => TextButton(
+                                  style: ButtonStyle(
+                                    backgroundColor:
+                                        MaterialStateProperty.all<Color>(
+                                      Color(0xFFFF785B),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Select Date',
+                                    style: GoogleFonts.lexendDeca(
+                                        color: Colors.white, fontSize: 16),
+                                  ),
+                                  onPressed: () async {
+                                    await _selectDate(context);
+                                    setState(() => loading = true);
+                                    await fetchData();
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                        Row(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             Padding(
@@ -137,8 +149,10 @@ class _DashboardState extends State<Dashboard> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.w600)),
                             ),
-                          ]),
-                    ]),
+                          ],
+                        ),
+                      ],
+                    ),
                     flex: 2,
                   ),
                   Expanded(
@@ -180,28 +194,31 @@ class _DashboardState extends State<Dashboard> {
                                           child: Column(
                                             children: [
                                               // customer identity
-                                              Row(children: [
-                                                Icon(Icons.person,
-                                                    color: Colors.grey,
-                                                    size: 17),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Text(
-                                                  ds.data()['userName'],
-                                                  style: GoogleFonts.lexendDeca(
-                                                      fontSize: 15),
-                                                ),
-                                                SizedBox(
-                                                  width: 10,
-                                                ),
-                                                Text(ds.data()['userPhone'],
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.person,
+                                                      color: Colors.grey,
+                                                      size: 17),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(
+                                                    ds.data()['userName'],
                                                     style:
                                                         GoogleFonts.lexendDeca(
-                                                            fontSize: 15,
-                                                            color: Colors
-                                                                .grey[800])),
-                                              ]),
+                                                            fontSize: 15),
+                                                  ),
+                                                  SizedBox(
+                                                    width: 10,
+                                                  ),
+                                                  Text(ds.data()['userPhone'],
+                                                      style: GoogleFonts
+                                                          .lexendDeca(
+                                                              fontSize: 15,
+                                                              color: Colors
+                                                                  .grey[800])),
+                                                ],
+                                              ),
                                               SizedBox(height: 5),
 
                                               // customer address
@@ -225,19 +242,6 @@ class _DashboardState extends State<Dashboard> {
                                                                   .grey[700]),
                                                     ),
                                                   ),
-                                                  // GestureDetector(
-                                                  //     onTap: () {
-                                                  //       AlertMessage()
-                                                  //           .showAlertDialog(
-                                                  //               context,
-                                                  //               'Address',
-                                                  //               ds.data()['address']);
-                                                  //     },
-                                                  //     child: Text(
-                                                  //       'View more',
-                                                  //       style: GoogleFonts.lexendDeca(
-                                                  //           color: Color(0xFFFF785B)),
-                                                  //     ))
                                                 ],
                                               ),
                                               SizedBox(height: 5),
@@ -288,104 +292,117 @@ class _DashboardState extends State<Dashboard> {
                                                         Visibility(
                                                           visible: visible,
                                                           child: Column(
-                                                              children: [
-                                                                Container(
-                                                                  color: Colors
-                                                                          .grey[
-                                                                      200],
-                                                                  child: Row(
-                                                                    children: [
-                                                                      Expanded(
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(3.0),
-                                                                            child:
-                                                                                Text("Dish", style: GoogleFonts.lexendDeca()),
-                                                                          ),
-                                                                          flex:
-                                                                              3),
-                                                                      Expanded(
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(3.0),
-                                                                            child:
-                                                                                Text("Price x Quantity", style: GoogleFonts.lexendDeca()),
-                                                                          ),
-                                                                          flex:
-                                                                              2),
-                                                                      Expanded(
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(3.0),
-                                                                            child:
-                                                                                Text("To be delivered before", style: GoogleFonts.lexendDeca()),
-                                                                          ),
-                                                                          flex:
-                                                                              2),
-                                                                      Expanded(
-                                                                          child:
-                                                                              Padding(
-                                                                            padding:
-                                                                                const EdgeInsets.all(3.0),
-                                                                            child:
-                                                                                Text("Delivered", style: GoogleFonts.lexendDeca()),
-                                                                          ),
-                                                                          flex:
-                                                                              2)
-                                                                    ],
-                                                                  ),
+                                                            children: [
+                                                              Container(
+                                                                color: Colors
+                                                                    .grey[200],
+                                                                child: Row(
+                                                                  children: [
+                                                                    Expanded(
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.all(3.0),
+                                                                          child: Text(
+                                                                              "Dish",
+                                                                              style: GoogleFonts.lexendDeca()),
+                                                                        ),
+                                                                        flex:
+                                                                            3),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.all(3.0),
+                                                                          child: Text(
+                                                                              "Price x Quantity",
+                                                                              style: GoogleFonts.lexendDeca()),
+                                                                        ),
+                                                                        flex:
+                                                                            2),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.all(3.0),
+                                                                          child: Text(
+                                                                              "To be delivered before",
+                                                                              style: GoogleFonts.lexendDeca()),
+                                                                        ),
+                                                                        flex:
+                                                                            2),
+                                                                    Expanded(
+                                                                        child:
+                                                                            Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.all(3.0),
+                                                                          child: Text(
+                                                                              "Delivered",
+                                                                              style: GoogleFonts.lexendDeca()),
+                                                                        ),
+                                                                        flex: 2)
+                                                                  ],
                                                                 ),
-                                                                SizedBox(
-                                                                    height: 4),
-                                                                ListView
-                                                                    .builder(
-                                                                  shrinkWrap:
-                                                                      true,
-                                                                  itemCount: ds
-                                                                      .data()[
-                                                                          'dishName']
-                                                                      .length,
-                                                                  itemBuilder:
-                                                                      (context,
-                                                                          index1) {
-                                                                    if (ds.data()['self_delivery'][index1] ==
-                                                                            false &&
-                                                                        ds.data()['dateToBeDelivered'][index1] ==
-                                                                            DateFormat('dd MMM y').format(selectedDate).toString()) {
-                                                                      return Row(
-                                                                        children: [
-                                                                          Expanded(
-                                                                              child: Text(ds.data()['dishName'][index1], style: GoogleFonts.lexendDeca()),
-                                                                              flex: 3),
-                                                                          Expanded(
-                                                                              child: Text('${ds.data()['pricePerServing'][index1]} x ${ds.data()['quantity'][index1]}', style: GoogleFonts.lexendDeca()),
-                                                                              flex: 2),
-                                                                          Expanded(
-                                                                              child: Text(ds.data()['toTime'][index1], style: GoogleFonts.lexendDeca()),
-                                                                              flex: 2),
-                                                                          Expanded(
-                                                                              child: Checkbox(
-                                                                                value: ds.data()['isDelivered'][index1],
-                                                                                onChanged: (value) async {
-                                                                                  List temp = ds.data()['isDelivered'];
-                                                                                  temp[index1] = !temp[index1];
-                                                                                  setState(() => loading = true);
-                                                                                  await Database().updateDeliveryStatus(ds.id, temp);
-                                                                                  setState(() => loading = false);
-                                                                                },
-                                                                              ),
-                                                                              flex: 2),
-                                                                        ],
-                                                                      );
-                                                                    } else {
-                                                                      return Container();
-                                                                    }
-                                                                  },
-                                                                ),
-                                                              ]),
+                                                              ),
+                                                              SizedBox(
+                                                                  height: 4),
+                                                              ListView.builder(
+                                                                shrinkWrap:
+                                                                    true,
+                                                                itemCount: ds
+                                                                    .data()[
+                                                                        'dishName']
+                                                                    .length,
+                                                                itemBuilder:
+                                                                    (context,
+                                                                        index1) {
+                                                                  if (ds.data()['self_delivery']
+                                                                              [
+                                                                              index1] ==
+                                                                          false &&
+                                                                      ds.data()['dateToBeDelivered']
+                                                                              [
+                                                                              index1] ==
+                                                                          DateFormat('dd MMM y')
+                                                                              .format(selectedDate)
+                                                                              .toString()) {
+                                                                    return Row(
+                                                                      children: [
+                                                                        Expanded(
+                                                                            child:
+                                                                                Text(ds.data()['dishName'][index1], style: GoogleFonts.lexendDeca()),
+                                                                            flex: 3),
+                                                                        Expanded(
+                                                                            child:
+                                                                                Text('${ds.data()['pricePerServing'][index1]} x ${ds.data()['quantity'][index1]}', style: GoogleFonts.lexendDeca()),
+                                                                            flex: 2),
+                                                                        Expanded(
+                                                                            child:
+                                                                                Text(ds.data()['toTime'][index1], style: GoogleFonts.lexendDeca()),
+                                                                            flex: 2),
+                                                                        Expanded(
+                                                                            child:
+                                                                                Checkbox(
+                                                                              value: ds.data()['isDelivered'][index1],
+                                                                              onChanged: (value) async {
+                                                                                List temp = ds.data()['isDelivered'];
+                                                                                temp[index1] = !temp[index1];
+                                                                                setState(() => loading = true);
+                                                                                await Database().updateDeliveryStatus(ds.id, temp);
+                                                                                setState(() => loading = false);
+                                                                              },
+                                                                            ),
+                                                                            flex:
+                                                                                2),
+                                                                      ],
+                                                                    );
+                                                                  } else {
+                                                                    return Container();
+                                                                  }
+                                                                },
+                                                              ),
+                                                            ],
+                                                          ),
                                                         )
                                                       ],
                                                     );

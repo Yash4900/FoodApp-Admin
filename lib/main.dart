@@ -20,19 +20,21 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: FutureBuilder(
-            future: Auth().getCurrentUser(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return Loading();
-              } else {
-                if (snapshot.hasData) {
-                  return Dashboard();
-                } else {
-                  return Login();
-                }
-              }
-            }));
+      debugShowCheckedModeBanner: false,
+      home: FutureBuilder(
+        future: Auth().getCurrentUser(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Loading();
+          } else {
+            if (snapshot.hasData) {
+              return Dashboard();
+            } else {
+              return Login();
+            }
+          }
+        },
+      ),
+    );
   }
 }
