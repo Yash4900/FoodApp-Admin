@@ -1,6 +1,6 @@
 # FoodApp - Admin :plate_with_cutlery:
 
-This is the Admin app where the Admin can manage orders :page_with_curl: which won't be delivered by the Chefs.
+This is the Admin app for https://github.com/hasti-15/Flutter-Internship where the Admin can manage orders :page_with_curl: which won't be delivered by the Chefs.
 
 The orders can be filtered by selecting a date. The Admin can mark the orders as delivered by clicking the checkbox :ballot_box_with_check:.
 
